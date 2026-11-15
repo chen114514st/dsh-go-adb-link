@@ -2,7 +2,8 @@
 
 DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
-二改于 <https://github.com/usi112/dsh-go-adb-link>（版本 1.3.1）
+本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.1）
+二改于 <https://github.com/usi112/dsh-go-adb-link>
 上游原版：<https://github.com/edgy7493/dsh-go-adb-link>
 
 ## 兼容性
@@ -26,10 +27,10 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 2. **GitHub 直接装**
 
    ```sh
-   dsh plugin --profile web add github:usi112/dsh-go-adb-link
+   dsh plugin --profile web add github:chen114514st/dsh-go-adb-link
    ```
 
-3. **离线 tarball**：从 [Releases](https://github.com/usi112/dsh-go-adb-link/releases) 下载
+3. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
    `dsh-go-adb-link-1.3.1.tgz` 放到手机，然后
    `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.1.tgz`
 

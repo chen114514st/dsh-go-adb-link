@@ -6,13 +6,13 @@
   "main": "lib/index.js",
   "license": "MIT",
   "author": "edgy7493",
-  "homepage": "https://github.com/usi112/dsh-go-adb-link#readme",
+  "homepage": "https://github.com/chen114514st/dsh-go-adb-link#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/usi112/dsh-go-adb-link.git"
+    "url": "git+https://github.com/chen114514st/dsh-go-adb-link.git"
   },
   "bugs": {
-    "url": "https://github.com/usi112/dsh-go-adb-link/issues"
+    "url": "https://github.com/chen114514st/dsh-go-adb-link/issues"
   },
   "keywords": [
     "dsh",
