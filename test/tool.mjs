@@ -99,16 +99,13 @@ if (pairDef) {
   check(badCode.ok === false && badCode.detail.includes('6 位'), 'adb_pair rejects a bad code', JSON.stringify(badCode.detail))
   const badHost = await pairDef.execute({ host: '', pairPort: 39235, code: '123456' }, {})
   check(badHost.ok === false && badHost.detail.length > 0, 'adb_pair rejects a missing host')
-  const unapproved = await pairDef.execute({ host: '192.168.1.5', pairPort: 39235, code: '123456' }, {})
-  check(unapproved.ok === false && unapproved.detail.includes('允许一次'), 'adb_pair needs one-time approval', JSON.stringify(unapproved.detail).slice(0, 120))
+  mod.__test.resetRuntime()
   if (guardFn) {
     const pairArgs = { name: 'adb_pair', arguments: { host: '192.168.1.5', pairPort: 39235, code: '123456' } }
-    const denied = guardFn(pairArgs)
-    check(typeof denied === 'string' && denied.includes('允许一次'), 'guard blocks adb_pair without approval', JSON.stringify(denied).slice(0, 100))
-    check(!/123456/.test(denied) && !/123456/.test(JSON.stringify(mod.__test.runtimeState().pending)), 'pairing code never appears in pending text')
-    allowOnce(commandKey(['pair', '192.168.1.5', 39235, '123456']))
-    check(guardFn(pairArgs) === undefined, 'guard passes adb_pair after approval')
-    clearGrants()
+    check(guardFn(pairArgs) === undefined, 'guard lets adb_pair through：连接与配对不需要放行')
+    check(mod.__test.runtimeState().pending === null, 'pairing no longer creates a pending command')
+    const connectArgs = { name: 'adb', arguments: { args: ['connect', '127.0.0.1:3455'] } }
+    check(guardFn(connectArgs) === undefined, 'guard lets adb connect through')
   }
 }
 

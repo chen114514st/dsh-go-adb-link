@@ -4,7 +4,7 @@
 
 DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
-本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.1）
+本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.2）
 二改于 <https://github.com/usi112/dsh-go-adb-link>
 上游原版：<https://github.com/edgy7493/dsh-go-adb-link>
 
@@ -33,8 +33,8 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
    ```
 
 3. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
-   `dsh-go-adb-link-1.3.1.tgz` 放到手机，然后
-   `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.1.tgz`
+   `dsh-go-adb-link-1.3.2.tgz` 放到手机，然后
+   `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.2.tgz`
 
 装完到 App 的「引擎」页重启一次引擎，输入框上方的状态条就会出现。
 
@@ -71,7 +71,7 @@ IP、配对端口和 6 位配对码。让 AI 用 `adb_pair` 工具完成配对�
 `state.json` 的 `addr`，以后自动重连直接用这个地址；找不到连接端口时，让 AI 用
 `connectPort` 参数重试（端口就在「无线调试」主页面）。
 配对码是敏感信息：只交给 adb 一次，不写 `state.json`、不进面板「最近命令」、不回显，
-工具调用卡上也用 `••••••` 代替。配对本身算系统级操作，工具层会拦下并要求在面板点「允许一次」。
+工具调用卡上也用 `••••••` 代替。配对、连接、断开都属于建立调试通道，工具层直接放行，不再要求点「允许一次」。
 
 TLS 配对记住的 `addr` 和固定端口的经典 TCP 是两条路径：点「固定端口」会清掉 `addr`、
 切回经典模式；想再用无线调试就重新配对一次。
@@ -113,6 +113,7 @@ dsh plugin --profile web remove dsh-go-adb-link
 
 ## 更新日志
 
+- **1.3.2**：连接、断开、无线调试配对改判为只读档，不再要求面板「允许一次」（之前连上和 AI 重试要走两遍，体验很差）；`adb tcpip`、安装、改设置等系统级操作仍然需要放行；`-s/-H/-P` 全局参数不再影响分级；补 `adb connect`/`adb tcpip` 分级单测。
 - **1.3.1**：`adb_pair` 纳入工具层 guard（配对按 confirm 处理，未放行时记进面板待允许，配对码只显示成 `••••••`）；`risk.js` 把 `adb pair` 判为 confirm；修正配对工具说明里的语病；固定端口期间状态条显示「正在固定端口…」；host:port 拼接收敛到 `formatHostPort()`，IPv6 地址统一加方括号；`adbConnect` 遇到空目标直接报 `no-target`；`parseMdns` 去掉没有人用的 legacy 分支；README 补充 TLS 与固定端口互斥。
 - **1.3.0**：面板新增「固定端口」（`adb tcpip 3455`，仅本次开机有效，需已有传输）；新增 Android 11+ 无线调试配对工具 `adb_pair`（配对码不落盘、mDNS 自动发现连接端口、地址记住后自动重连）；`logcat -f/--file/-r/-n` 写文件归入需同意；README 补固定端口与配对说明。
 - **1.2.5**：把 AI 行为边界从「提示词自觉」变成工具层强制：命令分只读 / 需同意 / 红线三级，面板新增「允许一次」「拒绝」，授权 120 秒过期且只对相同参数有效；截图按 PNG 落盘；工具支持 `serial`；`snapshot` 请求去重、adb server 掉线低频自愈；测试改用临时 `DSH_HOME`，无 ADB 通道自动跳过，新增单测与 `npm test`。
