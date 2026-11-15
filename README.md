@@ -19,10 +19,10 @@
 2. **GitHub 直接装**
 
    ```sh
-   dsh plugin --profile web add github:chen114514st/dsh-go-adb-link
+   dsh plugin --profile web add github:usi112/dsh-go-adb-link
    ```
 
-3. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
+3. **离线 tarball**：从 [Releases](https://github.com/usi112/dsh-go-adb-link/releases) 下载
    `dsh-go-adb-link-1.3.1.tgz` 放到手机，然后
    `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.1.tgz`
 
