@@ -1,5 +1,7 @@
 # dsh-go-adb-link
 
+[![CI](https://github.com/chen114514st/dsh-go-adb-link/actions/workflows/ci.yml/badge.svg)](https://github.com/chen114514st/dsh-go-adb-link/actions/workflows/ci.yml)
+
 DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
 本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.1）
