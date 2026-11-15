@@ -1,3 +1,10 @@
+# dsh-go-adb-link
+
+DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
+
+本仓库（二改版，1.3.1）：<https://github.com/usi112/dsh-go-adb-link>
+上游原版：<https://github.com/edgy7493/dsh-go-adb-link>
+
 ## 兼容性
 
 - 适配 **DSH Go 1.0.16**（引擎 `r15-dsh0.2.2-rc.1-node24.22.1`，Android arm64）。
