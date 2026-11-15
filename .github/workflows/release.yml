@@ -36,8 +36,11 @@ jobs:
       - name: 打包
         run: |
           npm pack
-          tar czf "dsh-go-adb-link-$(node -p "require('./package.json').version")-src.tar.gz" \
-            --exclude='*.tgz' --exclude='*.tar.gz' --exclude=node_modules --exclude=.git .
+          ver=$(node -p "require('./package.json').version")
+          # 先写到临时目录，避免 tar 读到正在写入的归档自身
+          tar czf "$RUNNER_TEMP/dsh-go-adb-link-$ver-src.tar.gz" \
+            --exclude='*.tgz' --exclude='*.tar.gz' --exclude=node_modules --exclude=.git -C . .
+          mv "$RUNNER_TEMP/dsh-go-adb-link-$ver-src.tar.gz" .
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
