@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import net from 'node:net'
 import fs from 'node:fs'
-import { probeAdb } from '../lib/adb.js'
+import { probeAdb, findAdbPorts } from '../lib/adb.js'
 import { judge, commandKey } from '../lib/risk.js'
 import { allowOnce, hasGrant, consumeGrant, clearGrants } from '../lib/grants.js'
 import { parseDevices, parseMdns } from '../lib/cli.js'
@@ -137,6 +137,34 @@ try {
   silent.server.close()
 }
 
+// 5.5 两段扫描：按段顺序找，命中即停；可中止、可排除。
+const staged = await fakeAdbd()
+try {
+  const stages = [
+    { ports: [silent.port] },
+    { ports: [staged.port] },
+    { start: 1, end: 40 },
+  ]
+  const seen = []
+  const hit = await findAdbPorts({
+    stages,
+    timeoutMs: 120,
+    onStage: (index) => seen.push(index),
+  })
+  check('staged scan returns the adbd port from a later stage', () => assert.deepEqual(hit, [staged.port]))
+  check('staged scan walks stages in order', () => assert.deepEqual(seen, [0, 1]))
+
+  const aborted = new AbortController()
+  aborted.abort()
+  const none = await findAdbPorts({ stages, timeoutMs: 120, signal: aborted.signal })
+  check('staged scan stops when aborted', () => assert.deepEqual(none, []))
+
+  const excluded = await findAdbPorts({ stages: [{ ports: [staged.port] }], timeoutMs: 120, exclude: [staged.port] })
+  check('staged scan honours exclude', () => assert.deepEqual(excluded, []))
+} finally {
+  staged.server.close()
+}
+
 // 6. state 损坏恢复与隔离。
 check('state lives under the temporary DSH_HOME', () => {
   assert.ok(statePath.startsWith(process.env.DSH_HOME), statePath)
@@ -190,6 +218,27 @@ check('panelDataFor carries pending fields', () => {
   assert.equal(data.pending, '—')
   assert.ok(String(data.pendingNote).length > 0)
   assert.ok('recent' in data)
+})
+check('panelDataFor explains the next step', () => {
+  const guide = (kind, lastError = '') => __test.panelDataFor({ kind, lastError }, 'zh').guide
+  assert.match(guide('connected'), /固定端口/)
+  assert.match(guide('waiting-auth'), /允许调试/)
+  assert.match(guide('no-adb'), /自动安装/)
+  assert.match(guide('disconnected', 'connect-failed'), /无线调试/)
+  assert.match(guide('disconnected', 'no-device'), /未就绪/)
+  assert.match(guide('disconnected', 'tls-connect-failed'), /重新配对/)
+  assert.match(guide('scanning-quick'), /稍等/)
+  assert.equal(__test.panelDataFor({ kind: 'connected' }, 'zh').guideTone, 'muted')
+})
+check('buildView binds the next-step callout', () => {
+  const text = JSON.stringify(__test.buildView('zh'))
+  assert.ok(text.includes('"$":"data.guide"'), 'guide binding')
+  assert.ok(text.includes('"$":"data.guideTone"'), 'guide tone binding')
+})
+check('quick scan has its own status text', () => {
+  const strip = __test.stripDataFor({ kind: 'scanning-quick' }, 'zh')
+  assert.match(strip.text, /快速扫描/)
+  assert.equal(strip.tone, 'info')
 })
 check('clipToolText truncates long output', () => {
   const long = __test.clipToolText('x'.repeat(20_000))

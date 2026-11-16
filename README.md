@@ -4,7 +4,7 @@
 
 DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
-本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.2）
+本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.3）
 二改于 <https://github.com/usi112/dsh-go-adb-link>
 上游原版：<https://github.com/edgy7493/dsh-go-adb-link>
 
@@ -27,8 +27,8 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
    ```
 
 2. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
-   `dsh-go-adb-link-1.3.2.tgz` 放到手机，然后
-   `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.2.tgz`
+   `dsh-go-adb-link-1.3.3.tgz` 放到手机，然后
+   `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.3.tgz`
 
 想装上游原版（1.2.4，不含本仓库的行为边界与配对等改动）才用 npm：
 `dsh plugin --profile web add dsh-go-adb-link`。
@@ -44,13 +44,14 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
 ## 端口不是 3455 也能用吗
 
-- **同一个手机换了端口**：可以。点「连接」会全端口扫描（1–65535），发 ADB 握手找 adbd，
-  不看端口号；扫描只认 `CNXN`/`AUTH` 应答，并过滤 TCP 自连造成的误报。
+- **同一个手机换了端口**：可以。点「连接」分两段扫描：先快速扫常见端口段（1024–10000），
+  几秒内找不到再全端口扫描（1–65535），发 ADB 握手找 adbd，不看端口号；扫描只认
+  `CNXN`/`AUTH` 应答，并过滤 TCP 自连造成的误报。
 - **另一个手机打开了 adb**：插件跑在哪台手机的环境里就找哪台，不会去连别的设备的局域网端口。
 - **经典 ADB over TCP**（`adb tcpip`、Stellar 的 TCP 功能）可以直接扫描找到。
 - Android 11+ 原生「无线调试」是 TLS 配对端口，握手探测不到，改用下面的配对流程。
 
-自动重连先试记住的端口和 `3455`、`5555`；都不通且之前授权过，会在后台重扫。
+自动重连先试记住的端口和 `3455`、`5555`；都不通且之前授权过，会在后台走这两段扫描。
 - AI 工具支持传 `serial`（等价于 `adb -s`），多设备时不会连错机器。
 - adb server 长时间掉线时，面板打开期间会每 5 分钟尝试 `adb start-server` 一次，再自动重连。
 
@@ -100,6 +101,19 @@ TLS 配对记住的 `addr` 和固定端口的经典 TCP 是两条路径：点「
 - 被拦下时，面板会显示 AI 想执行的命令，并出现「允许一次」「拒绝」两个按钮。点「允许一次」只放行这一条、这个参数，120 秒后失效；授权只在内存里，不写盘，也不改 `state.json`。
 - 放行只对完全相同的参数有效；AI 换参数会被重新拦下，提示词也明确要求它不许换参数绕过。
 
+## 故障排查
+
+| 现象 | 原因 | 处理 |
+| --- | --- | --- |
+| 状态条一直「ADB 未连接」 | adbd 没有开 TCP 调试 | 确认「无线调试」或 Stellar/TCP 已打开；插 USB 后点「连接」 |
+| 连接报 `Connection refused` | 记住的端口已失效（重启、adbd 重启） | 点「扫描端口」，先快速段再全端口 |
+| 卡在「等待授权」 | 手机弹窗没点允许，或没勾「始终允许」 | 在手机上点允许并勾选；不行就撤销调试授权后重连 |
+| 扫描很久没结果 | 全端口段 1–65535 最坏约 46 秒（面板上限 58 秒） | 等它跑完；常见端口通常在快速段几秒内命中 |
+| 「固定端口」报没有可用传输 | 当前没有 TCP 连接也没有 USB，`adb tcpip` 没有下发对象 | 先连上（或插 USB）再点「固定端口」 |
+| 重启手机后 3455 失效 | `adb tcpip` 只对本次开机有效 | 重启后点「固定端口」，或让插件重新扫描 |
+| 配对成功但连不上 | 无线调试的连接端口和配对端口是随机的 | 重新配对，或用「无线调试」主页的 IP:端口作为 `connectPort` 传给 `adb_pair` |
+| 面板「上次错误」非空 | 上一次连接失败的类别 | `unauthorized`：去手机允许调试；`no-device`：端口通了但设备没就绪，重启 adbd 再连；`connect-failed`：端口失效，点扫描；`tls-connect-failed`：TLS 地址失效，重新配对 |
+
 ## 卸载
 
 ```sh
@@ -110,6 +124,7 @@ dsh plugin --profile web remove dsh-go-adb-link
 
 ## 更新日志
 
+- **1.3.3**：扫描改为两段（先快速段 1024–10000，找不到再全端口），状态条区分「快速扫描 / 扫描端口」；面板新增「下一步」引导，按当前状态与 `lastError` 给出可操作提示；README 新增「故障排查」表与 `lastError` 对照。
 - **1.3.2**：连接、断开、无线调试配对改判为只读档，不再要求面板「允许一次」（之前连上和 AI 重试要走两遍，体验很差）；`adb tcpip`、安装、改设置等系统级操作仍然需要放行；`-s/-H/-P` 全局参数不再影响分级；补 `adb connect`/`adb tcpip` 分级单测。
 - **1.3.1**：`adb_pair` 纳入工具层 guard（配对按 confirm 处理，未放行时记进面板待允许，配对码只显示成 `••••••`）；`risk.js` 把 `adb pair` 判为 confirm；修正配对工具说明里的语病；固定端口期间状态条显示「正在固定端口…」；host:port 拼接收敛到 `formatHostPort()`，IPv6 地址统一加方括号；`adbConnect` 遇到空目标直接报 `no-target`；`parseMdns` 去掉没有人用的 legacy 分支；README 补充 TLS 与固定端口互斥。
 - **1.3.0**：面板新增「固定端口」（`adb tcpip 3455`，仅本次开机有效，需已有传输）；新增 Android 11+ 无线调试配对工具 `adb_pair`（配对码不落盘、mDNS 自动发现连接端口、地址记住后自动重连）；`logcat -f/--file/-r/-n` 写文件归入需同意；README 补固定端口与配对说明。
