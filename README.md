@@ -10,9 +10,10 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
 ## 兼容性
 
-- 适配 **DSH Go 1.0.16**（引擎 `r15-dsh0.2.2-rc.1-node24.22.1`，Android arm64）。
-- 1.0.16 新增了「本机 ADB shell 工具」和「Shizuku/本机 ADB 自更新」，两者都会碰到 adbd；实测升级后本插件的 `127.0.0.1:3455` 通道会自动恢复，`lastError` 为空，无需重连或重装。
+- 适配 **DSH Go 1.1.0**（当前最新版；引擎 `r15-dsh0.2.2-rc.1-node24.22.1`，Android arm64），实测连接、面板、`adb` / `adb_pair` 工具均正常。
+- 1.0.16 也兼容：该版本新增了「本机 ADB shell 工具」和「Shizuku/本机 ADB 自更新」，两者都会碰到 adbd；实测升级后本插件的 `127.0.0.1:3455` 通道会自动恢复，`lastError` 为空，无需重连或重装。
 - 1.0.15 可用；更早的版本没有验证。
+- DSH Go 更新频率较高。升级到新版引擎后如果遇到连接异常、面板不显示、工具报错等问题，请到 [Issues](https://github.com/chen114514st/dsh-go-adb-link/issues) 提 issue，附上 App 版本号、引擎版本和面板里的 `lastError`，方便定位。
 
 ## 安装
 
