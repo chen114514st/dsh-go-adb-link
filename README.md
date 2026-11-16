@@ -16,25 +16,21 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
 ## 安装
 
-市场已提交收录（PR 审核中），收录前可以先用下面的方式，效果一样：
+本二改版**不走 npm**：`dsh-go-adb-link` 这个包名归上游所有（npm 上的 latest 是原版 1.2.4），
+二改版以 GitHub 仓库为分发源，暂未进入任何插件市场。用下面两种方式安装：
 
-1. **npm 安装**（推荐；国内镜像已同步）
-
-   ```sh
-   dsh plugin --profile web add dsh-go-adb-link
-   ```
-
-   提示找不到版本时，加官方源：`dsh plugin --profile web add dsh-go-adb-link --registry=https://registry.npmjs.org/`
-
-2. **GitHub 直接装**
+1. **GitHub 直装**（推荐）
 
    ```sh
    dsh plugin --profile web add github:chen114514st/dsh-go-adb-link
    ```
 
-3. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
+2. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
    `dsh-go-adb-link-1.3.2.tgz` 放到手机，然后
    `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.2.tgz`
+
+想装上游原版（1.2.4，不含本仓库的行为边界与配对等改动）才用 npm：
+`dsh plugin --profile web add dsh-go-adb-link`。
 
 装完到 App 的「引擎」页重启一次引擎，输入框上方的状态条就会出现。
 
