@@ -4,7 +4,7 @@
 
 DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
-本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.3）
+本仓库：<https://github.com/chen114514st/dsh-go-adb-link>（二改版，版本 1.3.4）
 二改于 <https://github.com/usi112/dsh-go-adb-link>
 上游原版：<https://github.com/edgy7493/dsh-go-adb-link>
 
@@ -17,20 +17,26 @@ DSH Go 原生插件：自动找到手机上的 ADB TCP 端口并保持连接。
 
 ## 安装
 
-本二改版**不走 npm**：`dsh-go-adb-link` 这个包名归上游所有（npm 上的 latest 是原版 1.2.4），
-二改版以 GitHub 仓库为分发源，暂未进入任何插件市场。用下面两种方式安装：
+二改版以 npm scoped 包发布：**`@zzchen/dsh-go-adb-link`**（官方市场条目用的是这个包名）。
+上游原版仍占用非 scoped 的 `dsh-go-adb-link`（npm latest 1.2.4），不要和本版混装。用下面三种方式之一安装：
 
-1. **GitHub 直装**（推荐）
+1. **从插件市场或 npm 安装**（推荐）
+
+   ```sh
+   dsh plugin --profile web add @zzchen/dsh-go-adb-link
+   ```
+
+2. **GitHub 直装**（紧跟本仓库源码）
 
    ```sh
    dsh plugin --profile web add github:chen114514st/dsh-go-adb-link
    ```
 
-2. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
-   `dsh-go-adb-link-1.3.3.tgz` 放到手机，然后
-   `dsh plugin --profile web add /sdcard/Download/dsh-go-adb-link-1.3.3.tgz`
+3. **离线 tarball**：从 [Releases](https://github.com/chen114514st/dsh-go-adb-link/releases) 下载
+   `@zzchen/dsh-go-adb-link-1.3.4.tgz`（npm pack 产物名为 `zzchen-dsh-go-adb-link-1.3.4.tgz`）放到手机，然后
+   `dsh plugin --profile web add /sdcard/Download/zzchen-dsh-go-adb-link-1.3.4.tgz`
 
-想装上游原版（1.2.4，不含本仓库的行为边界与配对等改动）才用 npm：
+想装上游原版（1.2.4，不含本仓库的行为边界与配对等改动）才用非 scoped 名：
 `dsh plugin --profile web add dsh-go-adb-link`。
 
 装完到 App 的「引擎」页重启一次引擎，输入框上方的状态条就会出现。
@@ -117,13 +123,14 @@ TLS 配对记住的 `addr` 和固定端口的经典 TCP 是两条路径：点「
 ## 卸载
 
 ```sh
-dsh plugin --profile web remove dsh-go-adb-link
+dsh plugin --profile web remove @zzchen/dsh-go-adb-link
 ```
 
 也可以直接在 App 的插件详情里卸载。
 
 ## 更新日志
 
+- **1.3.4**：包名改为 npm scoped 的 `@zzchen/dsh-go-adb-link` 并发布到 npm（非 scoped 名归上游）；插件 id 与 `market-entry.json` 同步更新；补官方市场条目；功能与 1.3.3 相同。
 - **1.3.3**：扫描改为两段（先快速段 1024–10000，找不到再全端口），状态条区分「快速扫描 / 扫描端口」；面板新增「下一步」引导，按当前状态与 `lastError` 给出可操作提示；README 新增「故障排查」表与 `lastError` 对照。
 - **1.3.2**：连接、断开、无线调试配对改判为只读档，不再要求面板「允许一次」（之前连上和 AI 重试要走两遍，体验很差）；`adb tcpip`、安装、改设置等系统级操作仍然需要放行；`-s/-H/-P` 全局参数不再影响分级；补 `adb connect`/`adb tcpip` 分级单测。
 - **1.3.1**：`adb_pair` 纳入工具层 guard（配对按 confirm 处理，未放行时记进面板待允许，配对码只显示成 `••••••`）；`risk.js` 把 `adb pair` 判为 confirm；修正配对工具说明里的语病；固定端口期间状态条显示「正在固定端口…」；host:port 拼接收敛到 `formatHostPort()`，IPv6 地址统一加方括号；`adbConnect` 遇到空目标直接报 `no-target`；`parseMdns` 去掉没有人用的 legacy 分支；README 补充 TLS 与固定端口互斥。

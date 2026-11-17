@@ -30,7 +30,8 @@ if (pkg.dshGo?.v !== 1) problems.push('package.json 的 dshGo.v 应为 1')
 if (typeof pkg.dshGo?.minApp !== 'string') problems.push('package.json 的 dshGo.minApp 缺失')
 
 if (has('cordis.patch.yml')) {
-  const patch = read('cordis.patch.yml')
+  // scoped 包名在 YAML 里必须加引号，比较前统一去掉引号
+  const patch = read('cordis.patch.yml').replace(/["']/g, '')
   if (!patch.includes(`id: ${pkg.name}`) || !patch.includes(`name: ${pkg.name}`)) {
     problems.push('cordis.patch.yml 的 id/name 与 package.json 的 name 不一致')
   }
